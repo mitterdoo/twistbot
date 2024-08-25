@@ -125,7 +125,6 @@ private:
 		memset((void*)movesMade, 0, sizeof(char) * 7 * 7);
 	}
 
-
 	void FillRandomly();
 	void DestroyGem(Vector2 pos);
 	int DestroyRow(int row);
@@ -133,7 +132,6 @@ private:
 	int DestroyRadius(Vector2 pos, int radius);
 	Gem* HopGems(Match* run);
 	void Collapse();
-	int FindMatchesInRun(Gem* run[8], std::vector<Match>* matchesOut);
 	
 
 };

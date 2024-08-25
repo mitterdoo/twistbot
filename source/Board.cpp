@@ -551,77 +551,6 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 
 	return matches_size;
 
-	/*
-	int matchCount = 0;
-	// get rows and columns
-	Gem* rows[8][8];
-	Gem* cols[8][8];
-	for (int x = 0; x < 8; x++)
-	{
-		for (int y = 0; y < 8; y++)
-		{
-			rows[y][x] = &gems[x][y];
-		}
-	}
-	for (int x = 0; x < 8; x++)
-	{
-		for (int y = 0; y < 8; y++)
-		{
-			cols[x][y] = &gems[x][y];
-		}
-	}
-
-	// find the matches
-	std::vector<Match> foundMatches;
-	for (int row = 0; row < 8; row++)
-	{
-		matchCount += FindMatchesInRun(rows[row], &foundMatches);
-	}
-	for (int col = 0; col < 8; col++)
-	{
-		matchCount += FindMatchesInRun(cols[col], &foundMatches);
-	}
-
-	// find intersections
-
-	std::map<Gem*, Match> gemMap;
-	std::vector<Intersection> intersections;
-	for (Match match : foundMatches)
-	{
-		if (match.size() != 3) continue;
-		for (Gem* gem : match)
-		{
-			if (gemMap.contains(gem))
-			{
-				intersections.push_back({gemMap[gem], match, gem});
-			}
-			else
-			{
-				gemMap[gem] = match;
-			}
-		}
-	}
-
-	// prune intersections
-	for (Intersection inter : intersections)
-	{
-		matchCount--;
-		std::erase(foundMatches, inter.match1);
-		std::erase(foundMatches, inter.match2);
-		std::erase(inter.match1, inter.gem);
-		std::erase(inter.match2, inter.gem);
-
-		Match interMatch;
-		interMatch.push_back(inter.gem);
-		interMatch.insert(interMatch.end(), inter.match1.begin(), inter.match1.end());
-		interMatch.insert(interMatch.end(), inter.match2.begin(), inter.match2.end());
-		crossMatchesOut->push_back(interMatch);
-	}
-
-	matchesOut->insert(matchesOut->end(), foundMatches.begin(), foundMatches.end());
-
-	return matchCount;
-	*/
 }
 
 bool Board::CheckIfGemInMatch(Gem* gem)
@@ -678,98 +607,6 @@ bool Board::CheckIfGemInMatch(Gem* gem)
 	return false;
 
 }
-
-int Board::FindMatchesInRun(Gem* run[8], std::vector<Match>* matchesOut)
-{	
-	return 0;
-	/*
-	const int MINIMUM = 3;
-	int matchCount = 0;
-
-	Gem* currentMatch[8];
-	int currentMatch_count = 0;
-
-	for (int i = 0; i < 8; i++)
-	{
-		Gem* gem = run[i];
-		if (gem->color != GemColor::EMPTY &&
-			(currentMatch_count == 0 || currentMatch[0]->color == gem->color && gem->color != GemColor::COAL))
-		{
-			currentMatch[currentMatch_count++] = gem;
-		}
-		else
-		{
-			if (currentMatch_count >= MINIMUM)
-			{
-				Match match;
-				for (int j = 0; j < currentMatch_count; match.push_back(currentMatch[j++])) {}
-				matchesOut->push_back(match);
-				matchCount++;
-			}
-			
-			currentMatch_count = 0;
-			if (gem->color != GemColor::EMPTY)
-			{
-				currentMatch[currentMatch_count++] = gem;
-			}
-		}
-
-	}
-
-	if (currentMatch_count >= MINIMUM)
-	{
-		Match match;
-		for (int j = 0; j < currentMatch_count; match.push_back(currentMatch[j++])) {}
-		matchesOut->push_back(match);
-		matchCount++;
-	}
-	return matchCount;
-
-	*/
-	
-}
-/*
-int Board::FindMatchesInRun(Gem* run[8], std::vector<Match>* matchesOut)
-{	
-	const int MINIMUM = 3;
-	int matchCount = 0;
-
-	Match currentMatch;
-
-	for (int i = 0; i < 8; i++)
-	{
-		Gem* gem = run[i];
-		if (gem->color != GemColor::EMPTY &&
-			(currentMatch.size() == 0 || currentMatch.front()->color == gem->color && gem->color != GemColor::COAL))
-		{
-			currentMatch.push_back(gem);
-		}
-		else
-		{
-			if (currentMatch.size() >= MINIMUM)
-			{
-				matchesOut->push_back(currentMatch);
-				matchCount++;
-			}
-
-			currentMatch.clear();
-			if (gem->color != GemColor::EMPTY)
-			{
-				currentMatch.push_back(gem);
-			}
-		}
-
-	}
-
-	if (currentMatch.size() >= MINIMUM)
-	{
-		matchesOut->push_back(currentMatch);
-		matchCount++;
-	}
-	return matchCount;
-	
-}
-*/
 
 bool Board::ContainsMatch()
 {
@@ -906,25 +743,21 @@ void Board::DestroyGem(Vector2 pos)
 	}
 	else if (gem.Is(GemFlags::FLAME) && !gem.Is(GemFlags::LIGHTNING))
 	{
-		//score.AddScore(SCORES::SPECIAL_KILL_FLAME, "SPECIAL_KILL_FLAME");
-		score.AddScore(SCORE_DESTROY_FLAME);
+		score.AddScore(SCORES::SPECIAL_KILL_FLAME, "SPECIAL_KILL_FLAME");
 		DestroyRadius(gem.pos, 3);
 	}
 	else if (gem.Is(GemFlags::LIGHTNING) && !gem.Is(GemFlags::FLAME))
 	{
 		int count = 1;
-		//score.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING");
-		score.AddScore(SCORE_DESTROY_LIGHTNING);
+		score.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING");
 		count += DestroyRow(gem.pos.y);
 		count += DestroyCol(gem.pos.x);
-		//score.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
-		score.AddScore(SCORE_DESTROY_LIGHTNING_PERGEM * count);
+		score.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
 	}
 	else if (gem.Is(GemFlags::LIGHTNING) && gem.Is(GemFlags::FLAME))
 	{
 		int count = 1;
-		//score.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING (SUPERNOVA)");
-		score.AddScore(SCORE_DESTROY_NOVA);
+		score.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING (SUPERNOVA)");
 		count += DestroyRow(gem.pos.y - 1);
 		count += DestroyRow(gem.pos.y);
 		count += DestroyRow(gem.pos.y + 1);
@@ -932,13 +765,11 @@ void Board::DestroyGem(Vector2 pos)
 		count += DestroyCol(gem.pos.x - 1);
 		count += DestroyCol(gem.pos.x);
 		count += DestroyCol(gem.pos.x + 1);
-		//score.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
-		score.AddScore(SCORE_DESTROY_LIGHTNING_PERGEM * count);
+		score.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
 	}
 	else if (gem.Is(GemFlags::FRUIT))
 	{
-		//score.AddScore(SCORES::SPECIAL_KILL_FRUIT, "SPECIAL_KILL_FRUIT");
-		score.AddScore(SCORE_DESTROY_FRUIT_BASE);
+		score.AddScore(SCORES::SPECIAL_KILL_FRUIT, "SPECIAL_KILL_FRUIT");
 		int cRegular = 0;
 		int cFlame = 0;
 		int cLightning = 0;
@@ -967,51 +798,39 @@ void Board::DestroyGem(Vector2 pos)
 			}
 		}
 
-		score.AddScore(SCORE_DESTROY_FRUIT_PERGEM_MULT * SCORE_DESTROY_GEM * cRegular);
-		score.AddScore(SCORE_DESTROY_FRUIT_PERGEM_MULT * SCORE_DESTROY_FLAME * cFlame);
-		score.AddScore(SCORE_DESTROY_FRUIT_PERGEM_MULT * SCORE_DESTROY_LIGHTNING * cLightning);
-		score.AddScore(SCORE_DESTROY_FRUIT_PERGEM_MULT * SCORE_DESTROY_FRUIT_BASE * cFruit);
-		/*
 		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_NORMAL * cRegular, "SPECIAL_KILL_FRUIT_PERGEM_NORMAL");
 		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_FLAME * cFlame, "SPECIAL_KILL_FRUIT_PERGEM_FLAME");
 		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_LIGHTNING * cLightning, "SPECIAL_KILL_FRUIT_PERGEM_LIGHTNING");
 		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_FRUIT * cFruit, "SPECIAL_KILL_FRUIT_PERGEM_FRUIT");
-		*/
+
 
 	}
 	else if (gem.Is(GemFlags::DOOM))
 	{
-		//score.AddScoreNoMultiplier(SCORES::DOOM_DESTROY);
+		score.AddScoreNoMultiplier(SCORES::DOOM_DESTROY);
 		if (gem.count == this->lowestBomb)
 		{
 			matchResultFlags |= MATCHRESULT_DEFUSED_DANGER;
 		}
-		//int scale = max(1, 20 - gem.count);
-		//score.AddScore(SCORE_DESTROY_BOMB * scale * 4);
-		score.AddScore(SCORE_DESTROY_BOMB);
 		matchResultFlags |= MATCHRESULT_DEFUSED | MATCHRESULT_KILLDOOM;
 	}
 	else if (gem.Is(GemFlags::LOCKED))
 	{
-		//score.AddScore(SCORES::LOCK_DESTROY, "LOCK_DESTROY");
+		score.AddScore(SCORES::LOCK_DESTROY, "LOCK_DESTROY");
 	}
 	else if (gem.Is(GemFlags::BOMB))
 	{
-		//score.AddScoreNoMultiplier(SCORES::BOMB_DESTROY);
+		score.AddScoreNoMultiplier(SCORES::BOMB_DESTROY);
 		if (gem.count == this->lowestBomb)
 		{
 			matchResultFlags |= MATCHRESULT_DEFUSED_DANGER;
 		}
-		//int scale = max(1, 20 - gem.count);
-		//score.AddScore(SCORE_DESTROY_BOMB * scale * 4);
-		score.AddScore(SCORE_DESTROY_BOMB);
 		matchResultFlags |= MATCHRESULT_DEFUSED;
 	}
 
 	if (gem.locking)
 	{
-		score.AddScore(SCORE_DESTROY_LOCK);
-		//score.AddScore(SCORES::LOCKING_DESTROY, "LOCKING_DESTROY");
+		score.AddScore(SCORES::LOCKING_DESTROY, "LOCKING_DESTROY");
 	}
 
 }
