@@ -59,7 +59,6 @@ public:
 	int cascades;
 	int coalCount;
 	int multiplier = 1;
-	double multiplier2 = 1.0;
 
 	void Reset();
 	void ScoreMatch(int matchLength);

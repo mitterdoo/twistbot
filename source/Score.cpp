@@ -31,8 +31,7 @@ void Score::ScoreMatch(int matchLength)
 		//result = 200;
 		result = 20;
 	}
-	score += result * multiplier * multiplier2;
-	//printf("$$ %i\tScore::ScoreMatch(%i)\n", result * multiplier, matchLength);
+	score += result * multiplier;
 }
 
 void Score::ScoreCascade()
@@ -44,58 +43,46 @@ void Score::ScoreCascade()
 		break;
 
 	case 2:
-		//result = 50;
-		result = 5;
+		result = 50;
 		break;
 
 	case 3:
-		//result = 100;
-		result = 10;
+		result = 100;
 		break;
 
 	case 4:
-		//result = 150;
-		result = 15;
+		result = 150;
 		break;
 
 	case 5:
-		//result = 200;
-		result = 20;
+		result = 200;
 		break;
 
 	case 6:
-		//result = 300;
-		result = 30;
+		result = 300;
 		break;
 	
 	default:
-		//result = 400;
-		result = 40;
+		result = 400;
 	}
-	score += result * multiplier * multiplier2;
-	//printf("$$ %i\tScore::ScoreCascade() (%ith)\n", result * multiplier, cascades);
+	score += result * multiplier;
 }
 
 void Score::ScoreCoal()
 {
-	//int result = std::min(700, 350 + coalCount * 100) * multiplier;
-	int result = std::min(70, 35 + coalCount * 10) * multiplier * multiplier2;
+	int result = std::min(700, 350 + coalCount * 100) * multiplier;
 	score += result;
-
-	//printf("$$ %i\tScore::ScoreCoal() (%ith)\n", result, coalCount);
 	coalCount++;
 }
 
 void Score::AddScore(int score, const char* msg)
 {
-	this->score += score * multiplier * multiplier2;
-	//printf("$$ %i\tScore::AddScore(\"%s\")\n", score * multiplier, msg);
+	this->score += score * multiplier;
 }
 
 void Score::AddScore(SCORES score, const char* msg)
 {
-	this->score += (int)score * multiplier * multiplier2;
-	//printf("$$ %i\tScore::AddScore(\"%s\")\n", (int)(score * multiplier), msg);
+	this->score += (int)score * multiplier;
 }
 
 void Score::AddScoreNoMultiplier(SCORES score)
