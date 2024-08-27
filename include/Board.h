@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <math.h>
-#include <string>
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include <list>
@@ -66,8 +66,8 @@ public:
 	bool gameOver = false;
 	
 	// returns success
-	int Rotate(Vector2 pos);
-	void AntiRotate(Vector2 pos);
+	int Rotate(Vec2 pos);
+	void AntiRotate(Vec2 pos);
 
 	void SetComboMeter(int combo);
 
@@ -126,10 +126,10 @@ private:
 	}
 
 	void FillRandomly();
-	void DestroyGem(Vector2 pos);
+	void DestroyGem(Vec2 pos);
 	int DestroyRow(int row);
 	int DestroyCol(int col);
-	int DestroyRadius(Vector2 pos, int radius);
+	int DestroyRadius(Vec2 pos, int radius);
 	Gem* HopGems(Match* run);
 	void Collapse();
 	

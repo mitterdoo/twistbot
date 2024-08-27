@@ -1,5 +1,4 @@
 #pragma once
-#include <Windows.h>
 #include "HandyTypes.hpp"
 
 enum class GemColor {
@@ -63,13 +62,13 @@ public:
 	/// <param name="color"></param>
 	/// <param name="flags"></param>
 	/// <param name="pos"></param>
-	Gem(GemColor color, GemFlags flags, Vector2 pos);
+	Gem(GemColor color, GemFlags flags, Vec2 pos);
 
 	/// <summary>
 	/// Creates a GemColors::EMPTY gem at the position
 	/// </summary>
 	/// <param name="pos"></param>
-	Gem(Vector2 pos);
+	Gem(Vec2 pos);
 
 	/// <summary>
 	/// Creates a GemColors::EMPTY gem at (0, 0)
@@ -89,8 +88,8 @@ public:
 	int count = 0;
 	int locking = 0;
 
-	Vector2 pos;
-	Vector2 pixelPos;
+	Vec2 pos;
+	Vec2 pixelPos;
 
 	Gem Move(int x, int y);
 	inline const char* StringColor() { return flags == GemFlags::NONE ? GEM_COLORS[(int)color] : GEM_COLORS_SPECIAL[(int)color]; }

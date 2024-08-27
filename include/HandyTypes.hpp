@@ -1,16 +1,17 @@
 #pragma once
 #include <stdexcept>
+#include <cstring>
 
-typedef struct Vector2 {
+typedef struct Vec2 {
 	int x;
 	int y;
 
-	friend inline bool operator==(const Vector2& a, const Vector2& b)
+	friend inline bool operator==(const Vec2& a, const Vec2& b)
 	{
-		return memcmp((void*)&a, (void*)&b, sizeof(Vector2)) == 0;
+		return memcmp((void*)&a, (void*)&b, sizeof(Vec2)) == 0;
 	}
 
-} Vector2;
+} Vec2;
 
 template <typename T> class ArrayPtr
 {

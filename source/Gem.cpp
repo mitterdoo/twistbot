@@ -1,7 +1,7 @@
 #include <iostream>
 #include "Gem.h"
 
-Gem::Gem(GemColor color, GemFlags flags, Vector2 pos)
+Gem::Gem(GemColor color, GemFlags flags, Vec2 pos)
 {
 	this->color = color;
 	this->flags = flags;
@@ -9,7 +9,7 @@ Gem::Gem(GemColor color, GemFlags flags, Vector2 pos)
 	pixelPos = { 0, 0 };
 }
 
-Gem::Gem(Vector2 pos)
+Gem::Gem(Vec2 pos)
 {
 	color = GemColor::EMPTY;
 	flags = GemFlags::NONE;

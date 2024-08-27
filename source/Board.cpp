@@ -28,7 +28,7 @@ Board::~Board()
 {
 }
 
-int Board::Rotate(Vector2 pos)
+int Board::Rotate(Vec2 pos)
 {
 	int x = pos.x;
 	int y = pos.y;
@@ -56,7 +56,7 @@ int Board::Rotate(Vector2 pos)
 	return 1;
 }
 
-void Board::AntiRotate(Vector2 pos)
+void Board::AntiRotate(Vec2 pos)
 {
 	int x = pos.x;
 	int y = pos.y;
@@ -82,16 +82,14 @@ void Board::SetComboMeter(int combo)
 
 ComboResult Board::ComboAdd()
 {
-	score.AddScore(SCORE_COMBO_GAIN);
-	//score.AddScore(SCORES::SPECIAL_COMBO_MAINTAIN, "COMBO MAINTAIN");
+	score.AddScore(SCORES::SPECIAL_COMBO_MAINTAIN, "COMBO MAINTAIN");
 	if (++comboMeter.count >= COMBO_LOOKUP[comboMeter.multiplier-1])
 	{
 		comboMeter.count = 1;
-		score.AddScore(SCORE_COMBO_MULTIPLIER);
-		//score.AddScore(SCORES::SPECIAL_COMBO_LEVELUP, "COMBO LEVELUP");
+		score.AddScore(SCORES::SPECIAL_COMBO_LEVELUP, "COMBO LEVELUP");
 		if (comboMeter.multiplier == 10)
 		{
-			//score.AddScore(SCORES::SPECIAL_CREATE_FRUIT, "SPECIAL_CREATE_FRUIT");
+			score.AddScore(SCORES::SPECIAL_CREATE_FRUIT, "SPECIAL_CREATE_FRUIT");
 			return ComboResult::EARN_FRUIT;
 		}
 		else
@@ -109,13 +107,11 @@ int Board::ComboBreak()
 	{
 		int lost = comboMeter.count;
 		comboMeter.count = 0;
-		//score.AddScore(SCORES::SPECIAL_COMBO_BREAK_PER * lost, "BROKEN COMBO");
 		return lost;
 	}
 	else
 	{
 		comboMeter.multiplier = std::max(comboMeter.multiplier - 1, 1);
-		//score.AddScore(SCORES::SPECIAL_COMBO_BREAK, "BROKEN COMBO MULTIPLIER DROP");
 		return COMBO_LOOKUP[comboMeter.multiplier - 1];
 	}
 }
@@ -163,16 +159,6 @@ int Board::RunMatch(bool autoFill)
 				}
 			}
 			this->lowestBomb = lowestBomb;
-			/*
-			if (lowestBomb != 999)
-			{
-				score.multiplier2 = 0;// min(1.0, (double)lowestBomb / 30);
-			}
-			else
-			{
-				score.multiplier2 = 1.0;
-			}
-			*/
 		}
 
 		if (matchCount == 0)
@@ -227,21 +213,18 @@ int Board::RunMatch(bool autoFill)
 					if (length == 4)
 					{
 						picked->flags = (GemFlags)(picked->flags | GemFlags::FLAME);
-						score.AddScore(SCORE_CREATE_FLAME);
-						//score.AddScore(SCORES::SPECIAL_CREATE_FLAME, "SPECIAL_CREATE_FLAME");
+						score.AddScore(SCORES::SPECIAL_CREATE_FLAME, "SPECIAL_CREATE_FLAME");
 
 					}
 					else if (length == 5)
 					{
 						picked->flags = (GemFlags)(picked->flags | GemFlags::LIGHTNING);
-						//score.AddScore(SCORES::SPECIAL_CREATE_LIGHTNING, "SPECIAL_CREATE_LIGHTNING");
-						score.AddScore(SCORE_CREATE_LIGHTNING);
+						score.AddScore(SCORES::SPECIAL_CREATE_LIGHTNING, "SPECIAL_CREATE_LIGHTNING");
 					}
 					else
 					{
 						picked->flags = (GemFlags)((GemFlags)(picked->flags | GemFlags::LIGHTNING) | GemFlags::FLAME);
-						//score.AddScore(SCORES::SPECIAL_CREATE_NOVA, "SPECIAL_CREATE_NOVA");
-						score.AddScore(SCORE_CREATE_NOVA);
+						score.AddScore(SCORES::SPECIAL_CREATE_NOVA, "SPECIAL_CREATE_NOVA");
 					}
 					gemUpgrades[picked->pos.x][picked->pos.y] = 1;
 
@@ -283,22 +266,10 @@ int Board::RunMatch(bool autoFill)
 
 					score.AddScore((i+1) * SCORE_BONUS_PERLEVEL * (bonus.fruitBonus ? 5 : 1));
 
-					if (bonus.index == 4)
+					if (bonus.index == 4 && bonus.fruitBonus)
 					{
-						if (bonus.fruitBonus)
-						{
-							printf("REWARDING FRUIT BONUS GET\n");
-							score.AddScore(SCORE_MEGAFRUIT);
-							//score.AddScore(SCORES::SPECIAL_MEGAFRUIT, "SPECIAL_MEGAFRUIT");
-						}
-						else
-						{
-							score.AddScore(SCORE_BONUS_PERLEVEL * 10);
-						}
-					}
-					else if (bonus.fruitBonus)
-					{
-						//score.AddScore((int)SCORES::SPECIAL_MEGAFRUIT/2, "SPECIAL_MEGAFRUIT");
+						printf("REWARDING FRUIT BONUS GET\n");
+						score.AddScore(SCORES::SPECIAL_MEGAFRUIT, "SPECIAL_MEGAFRUIT");
 					}
 				}
 				else
@@ -332,7 +303,6 @@ int Board::RunMatch(bool autoFill)
 			bool isDoom = gem->Is(GemFlags::DOOM);
 			if ((isBomb || isDoom) && gem->count == 0)
 			{
-				//score.AddScore(SCORES::COUNTER_ZERO, "BOMB COUNTER ZERO");
 				gameOver = true;
 				matchResultFlags |= MATCHRESULT_BOMBZERO;
 			}
@@ -435,7 +405,7 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 		Gem* currentMatch[8];
 		int currentMatch_count = 0;
 		Match* currentMatch_intersectionMatch = nullptr;
-		Vector2 currentMatch_intersectionPoint = {-1, -1};
+		Vec2 currentMatch_intersectionPoint = {-1, -1};
 
 		for (int y = 0; y < 8; y++)
 		{
@@ -558,7 +528,7 @@ bool Board::CheckIfGemInMatch(Gem* gem)
 	GemColor col = gem->color;
 	if (col == GemColor::COAL || col == GemColor::EMPTY) return false;
 
-	Vector2 pos = gem->pos;
+	Vec2 pos = gem->pos;
 	// check vert
 
 	int count = 1;
@@ -728,7 +698,7 @@ std::string Board::GetString()
 	
 }
 
-void Board::DestroyGem(Vector2 pos)
+void Board::DestroyGem(Vec2 pos)
 {
 	// player just upgraded this gem. do not destroy
 	if (gemUpgrades[pos.x][pos.y]) return;
@@ -867,7 +837,7 @@ int Board::DestroyCol(int col)
 	return count;
 }
 
-int Board::DestroyRadius(Vector2 pos, int radius)
+int Board::DestroyRadius(Vec2 pos, int radius)
 {
 	int ox = pos.x - radius / 2;
 	int oy = pos.y - radius / 2;
