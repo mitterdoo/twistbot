@@ -106,6 +106,7 @@ public:
 	bool CheckIfGemInMatch(Gem* gem);
 
 	std::string GetString();
+	void FillRandomly(bool forceNoMove = false);
 
 private:
 	typedef struct Intersection
@@ -125,7 +126,6 @@ private:
 		memset((void*)movesMade, 0, sizeof(char) * 7 * 7);
 	}
 
-	void FillRandomly();
 	void DestroyGem(Vec2 pos);
 	int DestroyRow(int row);
 	int DestroyCol(int col);

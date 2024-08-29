@@ -22,6 +22,7 @@ const Color GEM_COLORS[] = {
 #define CELL_SIZE 128
 #define GRID_W 8
 #define GRID_H 8
+#define GEM_PADDING 20
 
 #define ORIGIN_X 32
 #define ORIGIN_Y 32

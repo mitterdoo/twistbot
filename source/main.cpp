@@ -16,6 +16,7 @@
 **********************************************************************************************/
 
 #include "raylib.h"
+#include "Board.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
@@ -28,11 +29,16 @@
 
 int main() 
 {
+	SetConfigFlags(FLAG_MSAA_4X_HINT);
+
 	InitWindow(1152, 1152, "raygui - controls test suite");
 	SetTargetFPS(60);
 	GuiLoadStyleDark();
 
 	bool showMessageBox = false;
+
+	Board* board = new Board();
+	board->FillRandomly(true);
 
 	while (!WindowShouldClose())
 	{
@@ -42,11 +48,18 @@ int main()
 			ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 			
 			Vector2 mouse_pos;
-			draw_board(NULL, &mouse_pos);
+			if (draw_board(board, &mouse_pos))
+			{
+				board->Rotate({(int)mouse_pos.x, (int)mouse_pos.y});
+				board->RunMatch(true);
+			}
 
 		EndDrawing();
 	}
 
 	CloseWindow();
+
+	delete board;
+
 	return 0;
 }

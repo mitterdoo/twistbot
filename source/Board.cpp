@@ -918,11 +918,13 @@ void Board::Collapse()
 
 }
 
-void Board::FillRandomly()
+void Board::FillRandomly(bool forceNoMove)
 {
+	printf("start fill\n");
 	char flags[64] {};
 	do
 	{
+		printf("> here's an attempt\n");
 		for (int x = 0; x < 8; x++)
 		{
 			for (int y = 0; y < 8; y++)
@@ -934,5 +936,7 @@ void Board::FillRandomly()
 				}
 			}
 		}
-	} while (!ContainsPossibleMatch());
+	} while ((forceNoMove && ContainsMatch()) || !ContainsPossibleMatch());
+	printf("filled successfully\n");
+
 }
