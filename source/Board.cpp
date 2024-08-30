@@ -181,7 +181,7 @@ int Board::RunMatch(bool autoFill)
 
 		score.ScoreCascade();
 
-		int matchColorCount[7] = {0, 0, 0, 0, 0, 0, 0};
+		int matchColorCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
 		for (Match match : matches)
 		{
@@ -190,6 +190,7 @@ int Board::RunMatch(bool autoFill)
 				Gem newGem = match.match[0]->Copy();
 				newGem.flags = GemFlags::FLAME;
 
+				// POTENTIAL BUG
 				matchColorCount[(int)match.match[0]->color]++;
 				score.ScoreMatch(3);
 				score.ScoreMatch(3);
