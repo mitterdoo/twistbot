@@ -1,7 +1,41 @@
 #include "boardwrapper.h"
 
-bool draw_board(Board* board, Vector2* mouse_click_pos)
+void load_sprites()
 {
+
+	printf("Loading sprites...");
+
+	memset((void*)GEM_SPRITES, 0, sizeof(Texture2D) * 9);
+
+	GEM_SPRITES[0] = LoadTexture("../res/gem_0.png");
+	GEM_SPRITES[1] = LoadTexture("../res/gem_1.png");
+	GEM_SPRITES[2] = LoadTexture("../res/gem_2.png");
+	GEM_SPRITES[3] = LoadTexture("../res/gem_3.png");
+	GEM_SPRITES[4] = LoadTexture("../res/gem_4.png");
+	GEM_SPRITES[5] = LoadTexture("../res/gem_5.png");
+	GEM_SPRITES[6] = LoadTexture("../res/gem_6.png");
+	GEM_SPRITES[7] = LoadTexture("../res/gem_7.png");
+
+	for (int i = 0; i < 8; i++)
+	{
+		while(!IsTextureReady(GEM_SPRITES[i]));
+	}
+
+	printf("loaded.\n");
+
+}
+
+void unload_sprites()
+{
+	for (int i = 0; i < 8; i++)
+	{
+		UnloadTexture(GEM_SPRITES[i]);
+	}
+}
+
+bool draw_board(Board* board, Vector2* cursor_pos)
+{
+
 	if (board == NULL)
 	{
 		throw new std::exception();
@@ -21,17 +55,27 @@ bool draw_board(Board* board, Vector2* mouse_click_pos)
 
 			// draw the gem fool
 			Gem* gem = &(board->gems[x][y]);
-			if (gem != NULL)
+			if (gem != NULL && gem->color != GemColor::EMPTY)
 			{
-				Color gem_color = GEM_COLORS[(int)gem->color];
-				Rectangle gem_rect = {
-					rect.x + GEM_PADDING,
-					rect.y + GEM_PADDING,
-					rect.width - GEM_PADDING*2,
-					rect.height - GEM_PADDING*2
-				};
-				DrawRectangleRounded(gem_rect, 0.5, 16, gem_color);
-				DrawRectangleRoundedLines(gem_rect, 0.5, 16, 4, {0, 0, 0, 255});
+				bool is_flame = gem->Is(GemFlags::FLAME);
+				bool is_lightning = gem->Is(GemFlags::LIGHTNING);
+
+				if (is_flame && !is_lightning)
+				{
+					DrawRectangleRec(rect, {255, 128, 0, 96});
+				}
+				else if (!is_flame && is_lightning)
+				{
+					DrawRectangleRec(rect, {255, 255, 255, 96});
+				}
+				else if (is_flame && is_lightning)
+				{
+					DrawRectangleRec(rect, {255, 0, 255, 128});
+				}
+
+
+				Texture2D tex = GEM_SPRITES[(int)gem->color];
+				DrawTextureEx(GEM_SPRITES[(int)gem->color], {rect.x, rect.y}, 0, 0.5, {255,255,255,255});
 
 			}
 
@@ -59,10 +103,10 @@ bool draw_board(Board* board, Vector2* mouse_click_pos)
 			CELL_SIZE*2,
 			CELL_SIZE*2
 		}, 4, {255,0,255,255}); */
+		cursor_pos->x = grid_pos.x;
+		cursor_pos->y = grid_pos.y;
 		if (clicked)
 		{
-			mouse_click_pos->x = grid_pos.x;
-			mouse_click_pos->y = grid_pos.y;
 			return true;
 		}
 

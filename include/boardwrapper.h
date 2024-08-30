@@ -27,6 +27,11 @@ const Color GEM_COLORS[] = {
 #define ORIGIN_X 32
 #define ORIGIN_Y 32
 
+inline Texture2D GEM_SPRITES[9];
+
+void load_sprites();
+void unload_sprites();
+
 /// @brief Draws the board
 /// @param board 
 /// @param mouse_click_pos Output for mouse click position

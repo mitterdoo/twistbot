@@ -29,25 +29,40 @@
 
 int main() 
 {
+
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 
 	InitWindow(1152, 1152, "raygui - controls test suite");
+	load_sprites();
 	SetTargetFPS(60);
 	GuiLoadStyleDark();
 
 	bool showMessageBox = false;
 
+	srand(14);
 	Board* board = new Board();
 	board->FillRandomly(true);
+
+	for (int x = 3; x < 6; x++)
+	{
+		for (int y = 3; y < 6; y++)
+		{
+			//board->gems[x][y].flags = (GemFlags)(board->gems[x][y].flags | GemFlags::LIGHTNING);
+		}
+	}
 
 	while (!WindowShouldClose())
 	{
 		// Draw
 		//----------------------------------------------------------------------------------
 		BeginDrawing();
+
+
 			ClearBackground(GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR)));
 			
 			Vector2 mouse_pos;
+			if (IsKeyPressed(KEY_T))
+				board->gems[(int)mouse_pos.x][(int)mouse_pos.y].flags = (GemFlags)(board->gems[(int)mouse_pos.x][(int)mouse_pos.y].flags | GemFlags::LIGHTNING);
 			if (draw_board(board, &mouse_pos))
 			{
 				board->Rotate({(int)mouse_pos.x, (int)mouse_pos.y});
@@ -58,6 +73,7 @@ int main()
 	}
 
 	CloseWindow();
+	unload_sprites();
 
 	delete board;
 
