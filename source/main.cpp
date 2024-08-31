@@ -30,18 +30,6 @@
 int main() 
 {
 
-	const GemColor colors[] = {
-		GemColor::RED, GemColor::ORANGE, GemColor::WHITE, GemColor::RED, GemColor::BLUE, GemColor::YELLOW, GemColor::ORANGE, GemColor::ORANGE,
-		GemColor::YELLOW, GemColor::PURPLE, GemColor::GREEN, GemColor::RED, GemColor::GREEN, GemColor::RED, GemColor::ORANGE, GemColor::ORANGE,
-		GemColor::GREEN, GemColor::RED, GemColor::WHITE, GemColor::WHITE, GemColor::RED, GemColor::WHITE, GemColor::BLUE, GemColor::BLUE,
-		GemColor::RED, GemColor::RED, GemColor::GREEN, GemColor::PURPLE, GemColor::YELLOW, GemColor::GREEN, GemColor::BLUE, GemColor::PURPLE,
-
-		GemColor::ORANGE, GemColor::YELLOW, GemColor::WHITE, GemColor::RED, GemColor::GREEN, GemColor::PURPLE, GemColor::WHITE, GemColor::YELLOW,
-		GemColor::GREEN, GemColor::YELLOW, GemColor::WHITE, GemColor::GREEN, GemColor::BLUE, GemColor::BLUE, GemColor::PURPLE, GemColor::RED,
-		GemColor::ORANGE, GemColor::RED, GemColor::ORANGE, GemColor::ORANGE, GemColor::PURPLE, GemColor::GREEN, GemColor::YELLOW, GemColor::PURPLE,
-		GemColor::GREEN, GemColor::GREEN, GemColor::ORANGE, GemColor::YELLOW, GemColor::PURPLE, GemColor::WHITE, GemColor::GREEN, GemColor::YELLOW
-	};
-
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 
 	InitWindow(1152, 1152, "raygui - controls test suite");
@@ -51,25 +39,8 @@ int main()
 
 	bool showMessageBox = false;
 
-	srand(14);
 	Board* board = new Board();
 	board->FillRandomly(true);
-
-
-	for (int x = 0; x < 8; x++)
-	{
-		for (int y = 0; y < 8; y++)
-		{
-			board->gems[x][y].color = colors[y*8 + x];
-
-
-			if (x == 1 && y == 6)
-				board->gems[x][y].flags = (GemFlags)(board->gems[x][y].flags | GemFlags::FLAME);
-				
-			if (x == 2 && y == 4)
-				board->gems[x][y].flags = (GemFlags)(board->gems[x][y].flags | GemFlags::LIGHTNING);
-		}
-	}
 
 	while (!WindowShouldClose())
 	{
@@ -85,7 +56,6 @@ int main()
 				board->gems[(int)mouse_pos.x][(int)mouse_pos.y].flags = (GemFlags)(board->gems[(int)mouse_pos.x][(int)mouse_pos.y].flags | GemFlags::LIGHTNING);
 			if (draw_board(board, &mouse_pos))
 			{
-				srand(14);
 				board->Rotate({(int)mouse_pos.x, (int)mouse_pos.y});
 				board->RunMatch(true);
 			}

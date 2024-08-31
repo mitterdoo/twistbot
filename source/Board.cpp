@@ -190,8 +190,7 @@ int Board::RunMatch(bool autoFill)
 				Gem newGem = match.match[0]->Copy();
 				newGem.flags = GemFlags::FLAME;
 
-				// POTENTIAL BUG
-				matchColorCount[(int)match.match[0]->color]++;
+				matchColorCount[(int)match.color]++;
 				score.ScoreMatch(3);
 				score.ScoreMatch(3);
 				for (int i = 0; i < match.match_size; i++)
@@ -205,7 +204,7 @@ int Board::RunMatch(bool autoFill)
 			else
 			{
 				score.ScoreMatch(match.match_size);
-				matchColorCount[(int)match.match[0]->color]++;
+				matchColorCount[(int)match.color]++;
 
 				int length = match.match_size;
 				if (length >= 4)
@@ -357,8 +356,9 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 		for (int x = 0; x < 8; x++)
 		{
 			Gem* gem = &gems[x][y];
-			if (gem->color != GemColor::EMPTY &&
-				(currentMatch_count == 0 || currentMatch[0]->color == gem->color && gem->color != GemColor::COAL))
+			GemColor color = gem->color;
+			if (color != GemColor::EMPTY &&
+				(currentMatch_count == 0 || currentMatch[0]->color == color && color != GemColor::COAL))
 			{
 				currentMatch[currentMatch_count++] = gem;
 			}
@@ -369,6 +369,7 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 					Match* match = &matches[matches_size++];
 					match->match_size = currentMatch_count;
 					memcpy((void*)match->match, (void*)currentMatch, sizeof(Gem*) * currentMatch_count);
+					match->color = match->match[0]->color; // hoping this doesn't cause errors
 					for (int j = 0; j < currentMatch_count; j++)
 					{
 						matchMap[VEC2INT(currentMatch[j]->pos.x, currentMatch[j]->pos.y)] = match;
@@ -377,7 +378,7 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 				}
 
 				currentMatch_count = 0;
-				if (gem->color != GemColor::EMPTY)
+				if (color != GemColor::EMPTY)
 				{
 					currentMatch[currentMatch_count++] = gem;
 				}
@@ -389,6 +390,8 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 			Match* match = &matches[matches_size++];
 			match->match_size = currentMatch_count;
 			memcpy((void*)match->match, (void*)currentMatch, sizeof(Gem*) * currentMatch_count);
+			
+			match->color = match->match[0]->color; // hoping this doesn't cause errors
 			for (int j = 0; j < currentMatch_count; j++)
 			{
 				matchMap[VEC2INT(currentMatch[j]->pos.x, currentMatch[j]->pos.y)] = match;
@@ -411,8 +414,9 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 		for (int y = 0; y < 8; y++)
 		{
 			Gem* gem = &gems[x][y];
-			if (gem->color != GemColor::EMPTY &&
-				(currentMatch_count == 0 || currentMatch[0]->color == gem->color && gem->color != GemColor::COAL))
+			GemColor color = gem->color;
+			if (color != GemColor::EMPTY &&
+				(currentMatch_count == 0 || currentMatch[0]->color == color && color != GemColor::COAL))
 			{
 				currentMatch[currentMatch_count++] = gem;
 				if (matchMap[VEC2INT(x, y)] != nullptr)
@@ -445,12 +449,14 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 							if (currentMatch[j]->pos == currentMatch_intersectionPoint) continue;
 							match->match[match->match_size++] = currentMatch[j];
 						}
+						match->color = match->match[0]->color; // hoping this doesn't cause errors
 					}
 					else
 					{
 						Match* match = &matches[matches_size++];
 						match->match_size = currentMatch_count;
 						memcpy((void*)match->match, (void*)currentMatch, sizeof(Gem*)* currentMatch_count);
+						match->color = match->match[0]->color; // hoping this doesn't cause errors
 						for (int j = 0; j < currentMatch_count; j++)
 						{
 							matchMap[VEC2INT(currentMatch[j]->pos.x, currentMatch[j]->pos.y)] = match;
@@ -463,7 +469,7 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 				currentMatch_count = 0;
 				currentMatch_intersectionMatch = nullptr;
 				currentMatch_intersectionPoint = {-1, -1};
-				if (gem->color != GemColor::EMPTY)
+				if (color != GemColor::EMPTY)
 				{
 					currentMatch[currentMatch_count++] = gem;
 					if (matchMap[VEC2INT(x, y)] != nullptr)
@@ -496,12 +502,14 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 					if (currentMatch[j]->pos == currentMatch_intersectionPoint) continue;
 					match->match[match->match_size++] = currentMatch[j];
 				}
+				match->color = match->match[0]->color; // hoping this doesn't cause errors
 			}
 			else
 			{
 				Match* match = &matches[matches_size++];
 				match->match_size = currentMatch_count;
 				memcpy((void*)match->match, (void*)currentMatch, sizeof(Gem*) * currentMatch_count);
+				match->color = match->match[0]->color; // hoping this doesn't cause errors
 				for (int j = 0; j < currentMatch_count; j++)
 				{
 					matchMap[VEC2INT(currentMatch[j]->pos.x, currentMatch[j]->pos.y)] = match;

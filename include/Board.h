@@ -12,11 +12,10 @@
 #include "HandyTypes.hpp"
 using namespace std;
 
-//typedef std::list<Gem*> Match;
 typedef struct Match
 {
 	bool isIntersection = false;
-//	std::list<Gem*> match;
+	GemColor color;
 	Gem* match[16];
 	int match_size = 0;
 } Match;
