@@ -358,7 +358,7 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 			Gem* gem = &gems[x][y];
 			GemColor color = gem->color;
 			if (color != GemColor::EMPTY &&
-				(currentMatch_count == 0 || currentMatch[0]->color == color && color != GemColor::COAL))
+				(currentMatch_count == 0 || currentMatch[0]->color == color && color != GemColor::COAL && !gem->Is(GemFlags::DOOM)))
 			{
 				currentMatch[currentMatch_count++] = gem;
 			}
@@ -416,7 +416,7 @@ int Board::GetMatches(std::vector<Match>* matchesOut)
 			Gem* gem = &gems[x][y];
 			GemColor color = gem->color;
 			if (color != GemColor::EMPTY &&
-				(currentMatch_count == 0 || currentMatch[0]->color == color && color != GemColor::COAL))
+				(currentMatch_count == 0 || currentMatch[0]->color == color && color != GemColor::COAL && !gem->Is(GemFlags::DOOM)))
 			{
 				currentMatch[currentMatch_count++] = gem;
 				if (matchMap[VEC2INT(x, y)] != nullptr)
