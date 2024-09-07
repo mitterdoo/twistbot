@@ -10,6 +10,7 @@
 #include "Gem.h"
 #include "Score.h"
 #include "HandyTypes.hpp"
+#include "TimingInfo.h"
 using namespace std;
 
 typedef struct Match
@@ -49,17 +50,24 @@ constexpr uint32_t MATCHRESULT_BOMBZERO =	0x00000010;
 class Board
 {
 public:
-	Board();
+	Board(int level=1, int moveCount=0);
 	~Board();
 
 	Gem gems[8][8];
 	Bonus bonus;
 	Score score;
+	int level;
+	int moveCount;
 	ComboMeter comboMeter;
 	uint32_t matchResultFlags = MATCHRESULT_NONE;
 	// keeps track of all null moves made
 	char movesMade[7][7];
 	int lowestBomb = -1;
+
+	TimingInfo timing_lock;
+	TimingInfo timing_bomb;
+	TimingInfo timing_coal;
+	TimingInfo timing_doom;
 
 
 	bool gameOver = false;

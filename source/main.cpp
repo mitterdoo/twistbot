@@ -38,8 +38,8 @@ int main()
 	GuiLoadStyleDark();
 
 	bool showMessageBox = false;
-
-	Board* board = new Board();
+ 
+	Board* board = new Board(3, 0);
 	board->FillRandomly(true);
 
 	while (!WindowShouldClose())
@@ -56,8 +56,8 @@ int main()
 				board->gems[(int)mouse_pos.x][(int)mouse_pos.y].flags = (GemFlags)(board->gems[(int)mouse_pos.x][(int)mouse_pos.y].flags | GemFlags::LIGHTNING);
 			if (draw_board(board, &mouse_pos))
 			{
-				board->Rotate({(int)mouse_pos.x, (int)mouse_pos.y});
-				board->RunMatch(true);
+				if (board->Rotate({(int)mouse_pos.x, (int)mouse_pos.y}))
+					board->RunMatch(true);
 			}
 
 		EndDrawing();

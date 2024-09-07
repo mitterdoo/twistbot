@@ -1,7 +1,10 @@
 #include "Board.h"
 
-Board::Board()
+Board::Board(int level, int moveCount)
 {
+
+	this->level = level;
+	this->moveCount = moveCount;
 	for (int x = 0; x < 8; x++)
 	{
 		for (int y = 0; y < 8; y++)
@@ -13,6 +16,12 @@ Board::Board()
 		{GemColor::RED, GemColor::RED, GemColor::RED, GemColor::RED},
 		0, 0
 	};
+
+	timing_lock = TimingInfo(TIMING_INFO_TYPE::LOCK, level, moveCount);
+	timing_bomb = TimingInfo(TIMING_INFO_TYPE::BOMB, level, moveCount);
+	timing_coal = TimingInfo(TIMING_INFO_TYPE::COAL, level, moveCount);
+	timing_doom = TimingInfo(TIMING_INFO_TYPE::DOOM, level, moveCount);
+
 	memset((void*)gemUpgrades, 0, sizeof(char) * 64);
 	ClearMovesMade();
 }
@@ -53,6 +62,8 @@ int Board::Rotate(Vec2 pos)
 
 	movesMade[pos.x][pos.y]++;
 
+	moveCount++;
+
 	return 1;
 }
 
@@ -67,6 +78,7 @@ void Board::AntiRotate(Vec2 pos)
 	gems[x][y + 1] = buffer[0].Move(x, y + 1);
 
 	movesMade[pos.x][pos.y]--;
+	moveCount--;
 }
 
 void Board::SetComboMeter(int combo)
@@ -120,6 +132,38 @@ int Board::ComboBreak()
 int Board::RunMatch(bool autoFill)
 {
 	score.Reset();
+
+	timing_lock.attempt_trigger_turnbased(level, moveCount);
+	timing_doom.attempt_trigger_turnbased(level, moveCount);
+
+	if (timing_lock.trigger)
+	{
+		int x = rand()%8;
+		int y = rand()%8;
+		Gem* gem = &gems[x][y];
+		if (gem != NULL)
+		{
+			gem->locking = true;
+			timing_lock.reset(level, moveCount);
+		}
+	}
+	
+	if (timing_doom.trigger)
+	{
+		while(1)
+		{
+			int x = rand()%8;
+			int y = rand()%8;
+			Gem* gem = &gems[x][y];
+			if (gem != NULL && !gem->locking)
+			{
+				gem->flags = (GemFlags)(gem->flags | GemFlags::DOOMSPAWN);
+				timing_doom.reset(level, moveCount);
+				break;
+			}
+		}
+	}
+
 	this->lowestBomb = -1;
 	matchResultFlags = MATCHRESULT_NONE;
 	for (int i = 0; i < 32; i++)
@@ -139,17 +183,25 @@ int Board::RunMatch(bool autoFill)
 					bool isBomb = gem->Is(GemFlags::BOMB);
 					bool isDoom = gem->Is(GemFlags::DOOM);
 					bool isLocking = gem->locking;
-					if (isBomb && !isDoom)
+					if (isBomb)
 					{
-						gem->count--;
+						if (--gem->count < 0)
+							gem->count = 0;
 					}
-					else if (isBomb && isDoom && matchCount == 0)
+					else if (isDoom && matchCount == 0)
 					{
-						gem->count--;
+						if (--gem->count < 0)
+							gem->count = 0;
 					}
 					else if (isLocking)
 					{
 						gem->flags = (GemFlags)(gem->flags | GemFlags::LOCKED);
+						gem->locking = 0;
+					}
+					else if (gem->Is(GemFlags::DOOMSPAWN))
+					{
+						gem->flags = GemFlags::DOOM;
+						gem->count = timing_doom.calc_value_base(level, moveCount);
 					}
 
 					if ((isBomb) && gem->count < lowestBomb)
@@ -946,6 +998,28 @@ void Board::FillRandomly(bool forceNoMove)
 			}
 		}
 	} while ((forceNoMove && ContainsMatch()) || !ContainsPossibleMatch());
-	printf("filled successfully\n");
+	printf("filled successfully. spawning special gems\n");
+
+	for (int x = 0; x < 8; x++)
+	{
+		for (int y = 0; y < 8; y++)
+		{
+			Gem* gem = &gems[x][y];
+			if (gem == NULL || !flags[x + y * 8]) continue; // only run if this was a gem we spawned
+			if (timing_coal.attempt_trigger(level, moveCount))
+			{
+				gem->flags = (GemFlags)(gem->flags | GemFlags::COAL);
+				gem->color = GemColor::COAL;
+				timing_coal.reset(level, moveCount);
+			}
+			else if (timing_bomb.attempt_trigger(level, moveCount))
+			{
+				gem->flags = (GemFlags)(gem->flags | GemFlags::BOMB);
+				gem->count = timing_bomb.calc_value_base(level, moveCount);
+				printf("> bomb with %d moves left\n", gem->count);
+				timing_bomb.reset(level, moveCount);
+			}
+		}
+	}
 
 }

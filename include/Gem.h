@@ -1,5 +1,6 @@
 #pragma once
 #include "HandyTypes.hpp"
+#include <fstream>
 
 enum class GemColor {
 	RED = 0,
@@ -23,9 +24,11 @@ enum class GemFlags {
 	IMMOVABLE = 0x0020, // 6
 	ICE = 0x0040,		// 7
 	ANGEL = 0x0080,		// 8
-	DOOM = 0x0100,		// 9
+	DOOM = 0x0100,		// 9		Doom gems will only have this flag--they don't have a combination of other flags like bomb or anything.
 	BOMB = 0x0200,		// 10
-	COAL = 0x0400		// 11
+	COAL = 0x0400,		// 11
+	UNK = 0x0800,		// 12 (unknown)
+	DOOMSPAWN = 0x1000  // 13 (of course it's 13)
 };
 
 inline int operator |(GemFlags a, GemFlags b)
@@ -84,6 +87,7 @@ public:
 
 	GemColor color;
 	GemFlags flags;
+	std::string str;
 	int rotated = 0;
 	int count = 0;
 	int locking = 0;
