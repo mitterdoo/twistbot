@@ -137,17 +137,33 @@ bool draw_board(Board* board, Vector2* cursor_pos)
 		}
 	}
 
-	char buff[64];
-	sprintf(buff, "Level: %d", board->level);
-	DrawText(buff, (int)board_rect.x, (int)board_rect.y + board_rect.height + 2, 24, {255,255,255,255});
+	char buff[512];
+	sprintf(buff, "Level: %d\n\nMultiplier: %d (%d)\n\nScore: %d\n\nLevel: %d/%d",
+		board->level,
+		board->comboMeter.multiplier, board->comboMeter.count,
+		board->score,
+		board->levelScore, board->levelScoreMax);
 
-	sprintf(buff, "LOCK: %d  BOMB: %d  COAL: %d  DOOM: %d",
-		board->timing_lock.count_before_next,
-		board->timing_bomb.count_before_next,
+
+	DrawText(buff, (int)board_rect.x - 300, (int)board_rect.y, 24, {255,255,255,255});
+
+	sprintf(buff, "LOCK: %d (%d%%)  BOMB: %d (%d%%)  COAL: %d  DOOM: %d",
+		board->timing_lock.count_before_next, (int)(board->timing_lock.multiplier * 100),
+		board->timing_bomb.count_before_next, (int)(board->timing_bomb.multiplier * 100),
 		board->timing_coal.count_before_next,
 		board->timing_doom.count_before_next);
 
 	DrawText(buff, (int)board_rect.x, (int)board_rect.y + board_rect.height + 26, 24, {255,100,100,255});
+
+
+	double level_progress = ((double)board->levelScore) / ((double)board->levelScoreMax);
+	Rectangle progress_bar = {64, 200, 128, 700};
+
+	DrawRectangleLinesEx(progress_bar, 4, {150, 150, 150, 255});
+	progress_bar.y += (1.0 - level_progress) * progress_bar.height;
+	progress_bar.height *= level_progress;
+
+	DrawRectangleRec(progress_bar, {255, 255, 100, 200});
 
 	Vector2 mouse_pos = GetMousePosition();
 

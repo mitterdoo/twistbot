@@ -24,6 +24,9 @@ TimingInfo::TimingInfo(TIMING_INFO_TYPE type, int level, int move_count)
 		case TIMING_INFO_TYPE::DOOM:
 			setup_doom();
 			break;
+		case TIMING_INFO_TYPE::LEVELSCORE:
+			setup_level_score();
+			break;
 
 	}
 	reset(level, move_count);
@@ -114,6 +117,26 @@ void TimingInfo::setup_doom()
 	multiplier = 1.0;
 }
 
+void TimingInfo::setup_level_score()
+{
+	timing_type = LEVELSCORE;
+	first_level = 1;
+	first_change_level = 2;
+	base = 2000;
+	value_base = 1;
+	levels_between_change = 1;
+	change = 650;
+	value_change = 1;
+	min = -1;
+	max = -1;
+	value_min = -1;
+	value_max = -1;
+	turns_between_change = 0;
+	turn_based = 0;
+	chance_pow = 0;
+	multiplier = 1;
+}
+
 bool TimingInfo::roll(int level, int move_count)
 {
 	int base = calc_base(level, move_count);
@@ -122,7 +145,7 @@ bool TimingInfo::roll(int level, int move_count)
 
 	if (chance_pow == 0)
 	{
-		return (trigger = true);
+		return (trigger = count_before_next <= 0);
 	}
 
 	double result = (double)(base - count_before_next) / base * multiplier;
@@ -205,4 +228,18 @@ int TimingInfo::calc_base_generic(int base, int change, int min, int max, int le
 	
 	return result;
 
+}
+
+void TimingInfo::update_forgiveness(int level_score, int level_score_max)
+{
+	double percent = ((double)level_score) / ((double)level_score_max);
+
+	if (percent < 0.5)
+	{
+		multiplier = percent;
+	}
+	else
+	{
+		multiplier = (percent - 0.5) * 2.0;
+	}
 }

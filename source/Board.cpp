@@ -2,9 +2,8 @@
 
 Board::Board(int level, int moveCount)
 {
-
-	this->level = level;
 	this->moveCount = moveCount;
+
 	for (int x = 0; x < 8; x++)
 	{
 		for (int y = 0; y < 8; y++)
@@ -17,10 +16,13 @@ Board::Board(int level, int moveCount)
 		0, 0
 	};
 
-	timing_lock = TimingInfo(TIMING_INFO_TYPE::LOCK, level, moveCount);
-	timing_bomb = TimingInfo(TIMING_INFO_TYPE::BOMB, level, moveCount);
-	timing_coal = TimingInfo(TIMING_INFO_TYPE::COAL, level, moveCount);
-	timing_doom = TimingInfo(TIMING_INFO_TYPE::DOOM, level, moveCount);
+	timing_lock = TimingInfo(LOCK, level, moveCount);
+	timing_bomb = TimingInfo(BOMB, level, moveCount);
+	timing_coal = TimingInfo(COAL, level, moveCount);
+	timing_doom = TimingInfo(DOOM, level, moveCount);
+	timing_level_score = TimingInfo(LEVELSCORE, level, moveCount);
+
+	StartLevel(level);
 
 	memset((void*)gemUpgrades, 0, sizeof(char) * 64);
 	ClearMovesMade();
@@ -35,6 +37,13 @@ Board* Board::Copy()
 
 Board::~Board()
 {
+}
+
+void Board::StartLevel(int level)
+{
+	this->level = level;
+	levelScore = 0;
+	levelScoreMax = max(500, timing_level_score.calc_base(level, moveCount));
 }
 
 int Board::Rotate(Vec2 pos)
@@ -94,14 +103,12 @@ void Board::SetComboMeter(int combo)
 
 ComboResult Board::ComboAdd()
 {
-	score.AddScore(SCORES::SPECIAL_COMBO_MAINTAIN, "COMBO MAINTAIN");
 	if (++comboMeter.count >= COMBO_LOOKUP[comboMeter.multiplier-1])
 	{
 		comboMeter.count = 1;
-		score.AddScore(SCORES::SPECIAL_COMBO_LEVELUP, "COMBO LEVELUP");
 		if (comboMeter.multiplier == 10)
 		{
-			score.AddScore(SCORES::SPECIAL_CREATE_FRUIT, "SPECIAL_CREATE_FRUIT");
+			moveScore.AddScore(SCORES::SPECIAL_CREATE_FRUIT, "SPECIAL_CREATE_FRUIT");
 			return ComboResult::EARN_FRUIT;
 		}
 		else
@@ -131,38 +138,7 @@ int Board::ComboBreak()
 
 int Board::RunMatch(bool autoFill)
 {
-	score.Reset();
-
-	timing_lock.attempt_trigger_turnbased(level, moveCount);
-	timing_doom.attempt_trigger_turnbased(level, moveCount);
-
-	if (timing_lock.trigger)
-	{
-		int x = rand()%8;
-		int y = rand()%8;
-		Gem* gem = &gems[x][y];
-		if (gem != NULL)
-		{
-			gem->locking = true;
-			timing_lock.reset(level, moveCount);
-		}
-	}
-	
-	if (timing_doom.trigger)
-	{
-		while(1)
-		{
-			int x = rand()%8;
-			int y = rand()%8;
-			Gem* gem = &gems[x][y];
-			if (gem != NULL && !gem->locking)
-			{
-				gem->flags = (GemFlags)(gem->flags | GemFlags::DOOMSPAWN);
-				timing_doom.reset(level, moveCount);
-				break;
-			}
-		}
-	}
+	moveScore.Reset();
 
 	this->lowestBomb = -1;
 	matchResultFlags = MATCHRESULT_NONE;
@@ -211,6 +187,40 @@ int Board::RunMatch(bool autoFill)
 				}
 			}
 			this->lowestBomb = lowestBomb;
+			
+			timing_lock.update_forgiveness(levelScore, levelScoreMax);
+			timing_bomb.update_forgiveness(levelScore, levelScoreMax);
+
+			timing_lock.attempt_trigger_turnbased(level, moveCount);
+			timing_doom.attempt_trigger_turnbased(level, moveCount);
+
+			if (timing_lock.trigger)
+			{
+				int x = rand()%8;
+				int y = rand()%8;
+				Gem* gem = &gems[x][y];
+				if (gem != NULL)
+				{
+					gem->locking = true;
+					timing_lock.reset(level, moveCount);
+				}
+			}
+			
+			if (timing_doom.trigger)
+			{
+				while(1)
+				{
+					int x = rand()%8;
+					int y = rand()%8;
+					Gem* gem = &gems[x][y];
+					if (gem != NULL && !gem->locking)
+					{
+						gem->flags = (GemFlags)(gem->flags | GemFlags::DOOMSPAWN);
+						timing_doom.reset(level, moveCount);
+						break;
+					}
+				}
+			}
 		}
 
 		if (matchCount == 0)
@@ -218,8 +228,8 @@ int Board::RunMatch(bool autoFill)
 			if (i == 0)
 			{
 				ComboBreak();
+				moveScore.multiplier = comboMeter.multiplier;
 				bonus.index = 0;
-				score.AddScore(SCORE_NULL);
 			}
 			break;
 		}
@@ -229,9 +239,10 @@ int Board::RunMatch(bool autoFill)
 			matchResultFlags |= MATCHRESULT_MATCHED;
 			ClearMovesMade();
 			ComboAdd();
+			moveScore.multiplier = comboMeter.multiplier;
 		}
 
-		score.ScoreCascade();
+		moveScore.ScoreCascade();
 
 		int matchColorCount[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
@@ -243,8 +254,8 @@ int Board::RunMatch(bool autoFill)
 				newGem.flags = GemFlags::FLAME;
 
 				matchColorCount[(int)match.color]++;
-				score.ScoreMatch(3);
-				score.ScoreMatch(3);
+				moveScore.ScoreMatch(3);
+				moveScore.ScoreMatch(3);
 				for (int i = 0; i < match.match_size; i++)
 				{
 					Gem* gem = match.match[i];
@@ -255,7 +266,7 @@ int Board::RunMatch(bool autoFill)
 			}
 			else
 			{
-				score.ScoreMatch(match.match_size);
+				moveScore.ScoreMatch(match.match_size);
 				matchColorCount[(int)match.color]++;
 
 				int length = match.match_size;
@@ -265,18 +276,18 @@ int Board::RunMatch(bool autoFill)
 					if (length == 4)
 					{
 						picked->flags = (GemFlags)(picked->flags | GemFlags::FLAME);
-						score.AddScore(SCORES::SPECIAL_CREATE_FLAME, "SPECIAL_CREATE_FLAME");
+						moveScore.AddScore(SCORES::SPECIAL_CREATE_FLAME, "SPECIAL_CREATE_FLAME");
 
 					}
 					else if (length == 5)
 					{
 						picked->flags = (GemFlags)(picked->flags | GemFlags::LIGHTNING);
-						score.AddScore(SCORES::SPECIAL_CREATE_LIGHTNING, "SPECIAL_CREATE_LIGHTNING");
+						moveScore.AddScore(SCORES::SPECIAL_CREATE_LIGHTNING, "SPECIAL_CREATE_LIGHTNING");
 					}
 					else
 					{
 						picked->flags = (GemFlags)((GemFlags)(picked->flags | GemFlags::LIGHTNING) | GemFlags::FLAME);
-						score.AddScore(SCORES::SPECIAL_CREATE_NOVA, "SPECIAL_CREATE_NOVA");
+						moveScore.AddScore(SCORES::SPECIAL_CREATE_NOVA, "SPECIAL_CREATE_NOVA");
 					}
 					gemUpgrades[picked->pos.x][picked->pos.y] = 1;
 
@@ -316,12 +327,10 @@ int Board::RunMatch(bool autoFill)
 					bonus.index++;
 					matchColorCount[(int)neededColor]--;
 
-					score.AddScore((i+1) * SCORE_BONUS_PERLEVEL * (bonus.fruitBonus ? 5 : 1));
-
 					if (bonus.index == 4 && bonus.fruitBonus)
 					{
 						printf("REWARDING FRUIT BONUS GET\n");
-						score.AddScore(SCORES::SPECIAL_MEGAFRUIT, "SPECIAL_MEGAFRUIT");
+						moveScore.AddScore(SCORES::SPECIAL_MEGAFRUIT, "SPECIAL_MEGAFRUIT");
 					}
 				}
 				else
@@ -370,7 +379,10 @@ int Board::RunMatch(bool autoFill)
 	else
 		matchlessMoves++;
 
-	int finalScore = score.score;
+	int finalScore = moveScore.score;
+
+	score += moveScore.score;
+	levelScore += moveScore.levelScore;
 
 	return finalScore;
 }
@@ -770,25 +782,25 @@ void Board::DestroyGem(Vec2 pos)
 
 	if (gem.Is(GemFlags::COAL))
 	{
-		score.ScoreCoal();
+		moveScore.ScoreCoal();
 	}
 	else if (gem.Is(GemFlags::FLAME) && !gem.Is(GemFlags::LIGHTNING))
 	{
-		score.AddScore(SCORES::SPECIAL_KILL_FLAME, "SPECIAL_KILL_FLAME");
+		moveScore.AddScore(SCORES::SPECIAL_KILL_FLAME, "SPECIAL_KILL_FLAME");
 		DestroyRadius(gem.pos, 3);
 	}
 	else if (gem.Is(GemFlags::LIGHTNING) && !gem.Is(GemFlags::FLAME))
 	{
 		int count = 1;
-		score.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING");
+		moveScore.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING");
 		count += DestroyRow(gem.pos.y);
 		count += DestroyCol(gem.pos.x);
-		score.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
+		moveScore.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
 	}
 	else if (gem.Is(GemFlags::LIGHTNING) && gem.Is(GemFlags::FLAME))
 	{
 		int count = 1;
-		score.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING (SUPERNOVA)");
+		moveScore.AddScore(SCORES::SPECIAL_KILL_LIGHTNING, "SPECIAL_KILL_LIGHTNING (SUPERNOVA)");
 		count += DestroyRow(gem.pos.y - 1);
 		count += DestroyRow(gem.pos.y);
 		count += DestroyRow(gem.pos.y + 1);
@@ -796,11 +808,11 @@ void Board::DestroyGem(Vec2 pos)
 		count += DestroyCol(gem.pos.x - 1);
 		count += DestroyCol(gem.pos.x);
 		count += DestroyCol(gem.pos.x + 1);
-		score.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
+		moveScore.AddScore((int)SCORES::SPECIAL_KILL_LIGHTNING_PERGEM * count, "SPECIAL_KILL_LIGHTNING_PERGEM");
 	}
 	else if (gem.Is(GemFlags::FRUIT))
 	{
-		score.AddScore(SCORES::SPECIAL_KILL_FRUIT, "SPECIAL_KILL_FRUIT");
+		moveScore.AddScore(SCORES::SPECIAL_KILL_FRUIT, "SPECIAL_KILL_FRUIT");
 		int cRegular = 0;
 		int cFlame = 0;
 		int cLightning = 0;
@@ -829,39 +841,30 @@ void Board::DestroyGem(Vec2 pos)
 			}
 		}
 
-		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_NORMAL * cRegular, "SPECIAL_KILL_FRUIT_PERGEM_NORMAL");
-		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_FLAME * cFlame, "SPECIAL_KILL_FRUIT_PERGEM_FLAME");
-		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_LIGHTNING * cLightning, "SPECIAL_KILL_FRUIT_PERGEM_LIGHTNING");
-		score.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_FRUIT * cFruit, "SPECIAL_KILL_FRUIT_PERGEM_FRUIT");
+		moveScore.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_NORMAL * cRegular, "SPECIAL_KILL_FRUIT_PERGEM_NORMAL");
+		moveScore.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_FLAME * cFlame, "SPECIAL_KILL_FRUIT_PERGEM_FLAME");
+		moveScore.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_LIGHTNING * cLightning, "SPECIAL_KILL_FRUIT_PERGEM_LIGHTNING");
+		moveScore.AddScore((int)SCORES::SPECIAL_KILL_FRUIT_PERGEM_FRUIT * cFruit, "SPECIAL_KILL_FRUIT_PERGEM_FRUIT");
 
 
 	}
 	else if (gem.Is(GemFlags::DOOM))
 	{
-		score.AddScoreNoMultiplier(SCORES::DOOM_DESTROY);
+		moveScore.AddScore(SCORES::SPECIAL_KILL_DOOM);
 		if (gem.count == this->lowestBomb)
 		{
 			matchResultFlags |= MATCHRESULT_DEFUSED_DANGER;
 		}
 		matchResultFlags |= MATCHRESULT_DEFUSED | MATCHRESULT_KILLDOOM;
 	}
-	else if (gem.Is(GemFlags::LOCKED))
-	{
-		score.AddScore(SCORES::LOCK_DESTROY, "LOCK_DESTROY");
-	}
 	else if (gem.Is(GemFlags::BOMB))
 	{
-		score.AddScoreNoMultiplier(SCORES::BOMB_DESTROY);
+		moveScore.AddScoreNoMultiplier(SCORES::SPECIAL_KILL_BOMB);
 		if (gem.count == this->lowestBomb)
 		{
 			matchResultFlags |= MATCHRESULT_DEFUSED_DANGER;
 		}
 		matchResultFlags |= MATCHRESULT_DEFUSED;
-	}
-
-	if (gem.locking)
-	{
-		score.AddScore(SCORES::LOCKING_DESTROY, "LOCKING_DESTROY");
 	}
 
 }
@@ -997,8 +1000,10 @@ void Board::FillRandomly(bool forceNoMove)
 				}
 			}
 		}
-	} while ((forceNoMove && ContainsMatch()) || !ContainsPossibleMatch());
+	} while ((forceNoMove && ContainsMatch()) || (!ContainsPossibleMatch() && !ContainsMatch()));
 	printf("filled successfully. spawning special gems\n");
+
+	bool spawned_bomb = false;
 
 	for (int x = 0; x < 8; x++)
 	{
@@ -1012,8 +1017,9 @@ void Board::FillRandomly(bool forceNoMove)
 				gem->color = GemColor::COAL;
 				timing_coal.reset(level, moveCount);
 			}
-			else if (timing_bomb.attempt_trigger(level, moveCount))
+			else if (spawned && !spawned_bomb && timing_bomb.attempt_trigger(level, moveCount))
 			{
+				spawned_bomb = true;
 				gem->flags = (GemFlags)(gem->flags | GemFlags::BOMB);
 				gem->count = timing_bomb.calc_value_base(level, moveCount);
 				printf("> bomb with %d moves left\n", gem->count);
@@ -1021,5 +1027,7 @@ void Board::FillRandomly(bool forceNoMove)
 			}
 		}
 	}
+	if (!spawned)
+		spawned = true;
 
 }

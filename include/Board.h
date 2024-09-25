@@ -8,7 +8,7 @@
 #include <map>
 #include <stdlib.h>
 #include "Gem.h"
-#include "Score.h"
+#include "MoveScore.h"
 #include "HandyTypes.hpp"
 #include "TimingInfo.h"
 using namespace std;
@@ -55,8 +55,11 @@ public:
 
 	Gem gems[8][8];
 	Bonus bonus;
-	Score score;
+	MoveScore moveScore;
 	int level;
+	int score = 0;
+	int levelScore = 0;
+	int levelScoreMax = 1;
 	int moveCount;
 	ComboMeter comboMeter;
 	uint32_t matchResultFlags = MATCHRESULT_NONE;
@@ -68,6 +71,7 @@ public:
 	TimingInfo timing_bomb;
 	TimingInfo timing_coal;
 	TimingInfo timing_doom;
+	TimingInfo timing_level_score;
 
 
 	bool gameOver = false;
@@ -127,6 +131,7 @@ private:
 	char gemUpgrades[8][8];
 
 	int matchlessMoves = 0;
+	bool spawned = false; // true once the board has been filled for the first time, after being created
 
 	inline void ClearMovesMade()
 	{
@@ -139,7 +144,7 @@ private:
 	int DestroyRadius(Vec2 pos, int radius);
 	Gem* HopGems(Match* run);
 	void Collapse();
-	
+	void StartLevel(int level);
 
 };
 

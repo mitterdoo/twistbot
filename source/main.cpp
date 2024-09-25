@@ -32,14 +32,14 @@ int main()
 
 	SetConfigFlags(FLAG_MSAA_4X_HINT);
 
-	InitWindow(1152, 1152, "raygui - controls test suite");
+	InitWindow(1400, 1152, "raygui - controls test suite");
 	load_sprites();
 	SetTargetFPS(60);
 	GuiLoadStyleDark();
 
 	bool showMessageBox = false;
  
-	Board* board = new Board(3, 0);
+	Board* board = new Board(1, 0);
 	board->FillRandomly(true);
 
 	while (!WindowShouldClose())

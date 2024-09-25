@@ -24,7 +24,7 @@ const Color GEM_COLORS[] = {
 #define GRID_H 8
 #define GEM_PADDING 20
 
-#define ORIGIN_X 32
+#define ORIGIN_X 350
 #define ORIGIN_Y 32
 
 inline Texture2D GEM_SPRITES[9];
