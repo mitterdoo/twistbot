@@ -1,4 +1,1 @@
-.vscode
-*.code-workspace
-binaries/*
-_exclude
+.vs

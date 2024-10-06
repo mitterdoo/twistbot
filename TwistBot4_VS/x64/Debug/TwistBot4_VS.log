@@ -1,0 +1,29 @@
+﻿  MonteCarlo.cpp
+C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(228,13): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(270,35): warning C4244: '=': conversion from 'double' to 'int64_t', possible loss of data
+C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,144): error C2228: left of '.score' must have class/struct/union
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,144):
+      type is 'int'
+  
+C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11): warning C4477: 'printf' : format string '%i' requires an argument of type 'int', but variadic argument 4 has type 'int64_t'
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      consider using '%lli' in the format string
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      consider using '%Ii' in the format string
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      consider using '%I64i' in the format string
+  
+C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11): warning C4477: 'printf' : format string '%d' requires an argument of type 'int', but variadic argument 5 has type 'int64_t'
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      consider using '%lld' in the format string
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      consider using '%Id' in the format string
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      consider using '%I64d' in the format string
+  
+C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11): warning C4473: 'printf' : not enough arguments passed for format string
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      placeholders and their parameters expect 7 variadic arguments, but 6 were provided
+      C:\Users\conno\Code\C++\TwistBot4_VS\TwistBot4_VS\source\MonteCarlo.cpp(418,11):
+      the missing variadic argument 7 is required by format string '%i'
+  
