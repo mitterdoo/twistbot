@@ -37,23 +37,23 @@ public:
 	MoveScore();
 
 	int score = 0;
-	int levelScore = 0;
+	int level_score = 0;
 	int cascades = 0;
-	int coalCount = 0;
+	int coal_count = 0;
 	int multiplier = 1;
 
-	void Reset();
-	void ScoreMatch(int matchLength);
-	void ScoreCascade();
-	void ScoreCoal();
-	void AddScore(int score, const char* msg = "");
-	void AddScore(SCORES score, const char* msg = "");
-	void AddScoreNoMultiplier(int score, const char* msg = "");
-	void AddScoreNoMultiplier(SCORES score, const char* msg = "");
+	void reset();
+	void score_match(int matchLength);
+	void score_cascade();
+	void score_coal();
+	void add_score(int score, const char* msg = "");
+	void add_score(SCORES score, const char* msg = "");
+	void add_score_no_multiplier(int score, const char* msg = "");
+	void add_score_no_multiplier(SCORES score, const char* msg = "");
 
 private:
-	int levelScoreAccumulator = 0;
-	void AddLevelScore(int baseScore, int score);
+	int level_score_accumulator = 0;
+	void add_level_score(int baseScore, int score);
 
 };
 
