@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <stdlib.h>
+#include <cstdint>
 
 #include "Board.h"
 #include "HandyTypes.hpp"

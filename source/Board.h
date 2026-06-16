@@ -1,13 +1,16 @@
 #pragma once
-#include <stdlib.h>
+#include <cstdint>
+#include <math.h>
 #include <string>
 #include <iostream>
 #include <vector>
 #include <list>
 #include <map>
+#include <stdlib.h>
 #include "Gem.h"
 #include "Score.h"
 #include "HandyTypes.hpp"
+using namespace std;
 
 //typedef std::list<Gem*> Match;
 typedef struct Match

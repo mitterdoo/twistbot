@@ -5,7 +5,7 @@
 #include <windows.h>
 #include <WinUser.h>
 #include "BejGame.h"
-#include "TwistBot3.h"
+#include "TwistBot4.h"
 
 ////////////////////// TODO: WORK FOR CLASSIC MODE AND SPECIAL GEMS
 /////////////////////TODO:
@@ -108,6 +108,7 @@ int main()
 		printf("Calculated moves in %i MS.\n", (int)time_span.count());
 
 		Vector2 pixelPos = board->gems[curMove.x][curMove.y].pixelPos;
+
 		pixelPos.x += 128;
 		pixelPos.y += 128;
 
@@ -116,7 +117,7 @@ int main()
 		printf("\n");
 		printf("===FINAL MOVE: (%i, %i)===\n", curMove.x, curMove.y);
 
-		//game->Click(pixelPos);
+		game->Click(pixelPos);
 		Sleep(300);
 		
 

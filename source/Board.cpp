@@ -71,7 +71,7 @@ void Board::AntiRotate(Vector2 pos)
 
 void Board::SetComboMeter(int combo)
 {
-	combo = min(152, combo);
+	combo = std::min(152, combo);
 	comboMeter.multiplier = 1;
 	while (combo >= COMBO_LOOKUP[comboMeter.multiplier - 1])
 	{
@@ -114,7 +114,7 @@ int Board::ComboBreak()
 	}
 	else
 	{
-		comboMeter.multiplier = max(comboMeter.multiplier - 1, 1);
+		comboMeter.multiplier = std::max(comboMeter.multiplier - 1, 1);
 		//score.AddScore(SCORES::SPECIAL_COMBO_BREAK, "BROKEN COMBO MULTIPLIER DROP");
 		return COMBO_LOOKUP[comboMeter.multiplier - 1];
 	}
